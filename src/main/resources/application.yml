@@ -1,0 +1,147 @@
+server:
+  port: 8081
+#  servlet:
+  #context-path: /sigepa
+  shutdown: graceful
+
+---
+spring:
+  application:
+    copyright: SIGEPA 2023
+    name: DETACHEMENT-SERVICE
+    security:
+      authentication:
+        jwt:
+          base64-secret: YmYwMThjYmY1NDVhODRmMTE3MTdlYjY5N2IyYjAwYTU5ZjYzNTdhNDNmOWE3ODE3ODk2ZTJiNzRkYmI1ZGY0NTI2NDc3MjMwOGQwOTAyZDUwNWQ1ZDU0ZWFiZjRjNTY4YTE5YmQ3MDBmMzFjM2NmNzc2NGQ2NjBmN2Y1YTdjOWE=
+          # Token is valid 24 hours
+          token-validity-in-seconds: 86400
+          token-validity-in-seconds-for-remember-me: 2592000
+
+---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+---
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 200KB
+      max-file-size: 500MB
+      max-request-size: 500MB
+  jpa:
+    properties:
+      hibernate:
+        show_sql: false
+    hibernate.ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+#  liquibase:
+#    contexts: dev
+#    change-log: classpath:config/liquibase/master.xml
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  profiles:
+    active: dev
+  devtools:
+    restart:
+      enabled: true
+      additional-exclude: .h2.server.properties
+    livereload:
+      enabled: true
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://localhost:5432/detachementdb
+    username: postgres
+    password: admin
+    hikari:
+      poolName: Hikari
+      auto-commit: false
+  mail:
+      protocol: smtp
+      host: smtp.gmail.com
+      port: 587
+      username: devspmabg@gmail.com
+      password: hjzuvunrngdfuatw
+      test-connection: false
+      properties:
+          mail:
+              smtp:
+                  ssl:
+                  trust: smtp.gmail.com
+                  auth: true
+                  starttls:
+                      enable: true
+  h2:
+    console:
+      enable: true
+      path: /h2-console
+
+---
+spring:
+  config:
+    activate:
+      on-profile: aws
+
+---
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui: #pour trier les chemins d'API dans l'ordre de leurs m�thodes HTTP
+    operationsSorter: method
+
+---
+#log app
+logging:
+  level:
+    ROOT: INFO
+    bf.mfptps.detachementservice:
+      - DEBUG
+      - INFO
+
+---
+storage:
+  # replace 'localhost' by host address for production
+  host: http://localhost:8081${server.servlet.context-path:/}
+  folder: ${user.home}/storage/
+  #below Amazon S3 Configuration
+  bucketName:
+  apiKey:
+  apiSecret:
+  region: us-east-1
+  urlExpiration: # In minutes.
+
+
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#  client:
+#    service-url:
+#      default-zone: http://localhost:8761/eureka
+---
+#CONFIG DE PRODUCTION
+spring:
+  config:
+    activate:
+      on-profile: prod
+  main:
+    banner-mode: off
+  devtools:
+    restart:
+      enabled: false
+  jpa:
+    hibernate.ddl-auto: update
+    show-sql: false
+    database: postgresql
+  datasource:
+    initialization-mode: always
+    platform: postgres
+    url: jdbc:postgresql://localhost:5432/detachementdb
+    username: postgres
+    password: admin
+    hikari:
+      auto-commit: false
